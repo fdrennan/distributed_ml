@@ -2,3 +2,5 @@ configuration.ini
 .idea/
 __pycache__
 .idea
+scikit_model
+
