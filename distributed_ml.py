@@ -72,6 +72,7 @@ class Distributor():
 
     def upload_file(self):
         if not self.server:
+            shutil.copyfile("configuration.ini", self.MODEL_DIRECTORY + "/configuration.ini")
             shutil.make_archive(self.MODEL_DIRECTORY, 'zip', self.MODEL_DIRECTORY)
             self.origin = self.MODEL_DIRECTORY + '.zip'
             self.destination = self.MODEL_DIRECTORY + '.zip'
@@ -81,6 +82,10 @@ class Distributor():
             self.origin = self.MODEL_DIRECTORY + '.zip'
             self.destination = self.MODEL_DIRECTORY + '_update.zip'
             self.BUCKET.upload_file(self.origin, self.destination)
+
+    def download_file(self):
+        if not self.server:
+            self.BUCKET.download_file(self.MODEL_DIRECTORY + '.zip', self.MODEL_DIRECTORY + '_update.zip')
 
     def launch_instances(self, n, size):
 
