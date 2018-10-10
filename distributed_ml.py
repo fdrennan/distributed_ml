@@ -5,6 +5,7 @@ import os
 import datetime
 import shutil
 
+
 class Distributor():
 
     NOW = datetime.datetime.now()
@@ -27,16 +28,18 @@ class Distributor():
         # Connecting to S3
         BUCKET = boto3.resource('s3').Bucket(BUCKET_NAME)
         MODEL_DIRECTORY = config['MODEL_DATA']['model_directory']
-        SCRIPT = config['MODEL_DATA']['stript_to_run']
+        SCRIPT = config['MODEL_DATA']['script_to_run']
 
-
-        user_data = CreateUserData()
-
-    def __init__(self):
+    def __init__(self, server):
         if self.config_exists:
             print("Configuration File Found!")
         else:
             print("Please set up a configuration file. .")
+
+        self.server = server
+
+        if not server:
+            self.user_data = CreateUserData()
 
     def update_config(self):
         config = configparser.ConfigParser()
@@ -68,10 +71,16 @@ class Distributor():
         self.BUCKET.download_file(self.origin, self.destination)
 
     def upload_file(self):
-        shutil.make_archive(self.MODEL_DIRECTORY, 'zip', self.MODEL_DIRECTORY)
-        self.origin = self.MODEL_DIRECTORY + '.zip'
-        self.destination = self.MODEL_DIRECTORY + '.zip'
-        self.BUCKET.upload_file(self.origin, self.destination)
+        if not self.server:
+            shutil.make_archive(self.MODEL_DIRECTORY, 'zip', self.MODEL_DIRECTORY)
+            self.origin = self.MODEL_DIRECTORY + '.zip'
+            self.destination = self.MODEL_DIRECTORY + '.zip'
+            self.BUCKET.upload_file(self.origin, self.destination)
+        else:
+            shutil.make_archive(self.MODEL_DIRECTORY, 'zip', ".")
+            self.origin = self.MODEL_DIRECTORY + '.zip'
+            self.destination = self.MODEL_DIRECTORY + '_update.zip'
+            self.BUCKET.upload_file(self.origin, self.destination)
 
     def launch_instances(self, n, size):
 
@@ -114,9 +123,9 @@ class Distributor():
             self.update_ids()
 
 
-D = Distributor()
-D.upload_file()
-D.launch_instances(1, 't2.medium')
+D = Distributor(server = False)
+# D.upload_file()
+# D.launch_instances(1, 't2.medium')
 # D.terminate_instances()
 print(D.user_data)
 # D.upload_file()

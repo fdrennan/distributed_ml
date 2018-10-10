@@ -10,6 +10,7 @@ def CreateUserData():
     GIT_EMAIL        = config['GIT']['git_email']
     GIT_REPO         = config['GIT']['repository']
     MODEL_DIRECTORY  = config['MODEL_DATA']['model_directory']
+    SCRIPT           = config['MODEL_DATA']['script_to_run']
     BUCKET           = config['BUCKETS']['bucket_name']
 
     REPOSITORY       = 'git clone ' + GIT_REPO
@@ -17,6 +18,8 @@ def CreateUserData():
     BUCKET_DIR       = BUCKET + "/" + MODEL_ZIP
     DOWNLOAD_COMMAND = 'aws s3 cp s3://' + BUCKET_DIR + " " + MODEL_DIRECTORY + "/" + MODEL_ZIP
     UNZIP            = 'unzip ' + MODEL_ZIP
+    RUN              = "python3 " + SCRIPT
+
 
     user_data ='''#!/bin/bash
     
@@ -66,6 +69,7 @@ def CreateUserData():
     ''' + DOWNLOAD_COMMAND + '''
     cd ''' +  MODEL_DIRECTORY + '''
     ''' + UNZIP + '''
+    ''' + RUN + '''
     echo "Done" >> /root/where_we_at'''
 
     return user_data
